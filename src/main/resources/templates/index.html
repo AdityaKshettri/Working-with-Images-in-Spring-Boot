@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+	<meta charset="UTF-8" />
+	<title>Spring Boot Image Demo</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+	<link rel="stylesheet" href="/main.css">
+</head>
+<body>
+	<h2>Spring Boot Image Demo</h2>
+	<hr>
+	
+	<a th:if="${authenticated}" th:href="@{/logout}" 
+		class="btn btn-primary btn-sm">
+		Logout
+	</a>
+	<a th:if="!${authenticated}" th:href="@{/login}" 
+		class="btn btn-primary btn-sm">
+		Login
+	</a>
+	<a th:if="!${authenticated}" th:href="@{/signup}" 
+		class="btn btn-primary btn-sm">
+		SignUp
+	</a>
+	<br>
+	<br>
+
+	<div class="container">
+
+		<p th:text="${page.number+1} + ' of ' + ${page.totalPages}"></p>
+		<p th:text="${page.size} + ' items per page'"></p>
+		
+		<p th:if="${#vars['flash.message']}" th:text="${#vars['flash.message']}" class="flash"></p>
+		
+		<table class="table table-bordered table-striped">
+		
+			<thead class="thead-dark">
+				<tr>
+					<th>Id</th>
+					<th>Name</th>
+					<th>Owner</th>
+					<th>Image</th>
+					<th th:if="${authenticated}"></th>
+				</tr>
+			</thead>
+			
+			<tbody>
+				<tr th:each="image : ${page.content}">
+					<td th:text="${image.id}" />
+					<td th:text="${image.name}" />
+					<td th:text="${image.owner.username}" />
+					<td>
+						<a th:href="@{'/images/' + ${image.name}}">
+							<img th:src="@{'/images/' + ${image.name}}" class="thumbnail"/>
+						</a>
+					</td>
+					<td th:if="${authenticated}">
+						<a th:if="${currentUser==image.owner}" th:href="@{'/images/delete/' + ${image.name}}">Delete</a>
+					</td>
+				</tr>
+			</tbody>
+			
+		</table>
+		
+		<ul>
+			<li th:if="${prev}"><a href="@{/(size=${prev.pageSize},page=${prev.pageNumber})}">Previous</a></li>
+			<li th:if="${next}"><a href="@{/(size=${next.pageSize},page=${next.pageNumber})}">Next</a></li>
+		</ul>
+		
+		<div th:if="${authenticated}">
+			<form sec:authorize-url="POST /images" method="post" enctype="multipart/form-data" th:action="@{/images}">
+				<p><input type="file" name="file" /></p>
+				<button type="submit" class="btn btn-primary btn-sm">Upload</button>
+			</form>
+		</div>
+		
+	</div>
+	
+</body>
+</html>
